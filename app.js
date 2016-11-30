@@ -3,7 +3,8 @@ var app = express();
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 
-http.listen(8080);
+var port = 8080;
+http.listen(port);
 
 app.use(express.static(__dirname + "/public"));
 
@@ -18,16 +19,22 @@ io.on("connection", function(socket) {
 	players.push(player);
 
 	socket.on("requestMove", function(data) {
-		if (data == "up") {
+		if (data == 1) { // Up
 			player.y += 1;
-		} else if (data == "down") {
-			player.y -= 1;
-		} else if (data == "left") {
-			player.x -= 1;
-		} else if (data == "right") {
+		} else if (data == 2) { // Right
 			player.x += 1;
+		} else if (data == 3) { // Down
+			player.y -= 1;
+		} else if (data == 4) { // Left
+			player.x -= 1;
 		}
 	});
 });
 
-console.log("Listening...");
+function update() {
+	io.emit("updatePlayers", players)
+}
+
+var mainLoop = setInterval(update, 1000/60);
+
+console.log("Listening on port: " + port);

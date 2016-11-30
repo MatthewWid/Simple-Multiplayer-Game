@@ -10,24 +10,33 @@ var keys = [];
 
 function update() {
 	if (keys[87]) {
-		socket.emit("requestMove", "up");
-	}
-	if (keys[83]) {
-		socket.emit("requestMove", "down");
+		socket.emit("requestMove", 1); // Up
 	}
 	if (keys[68]) {
-		socket.emit("requestMove", "right");
+		socket.emit("requestMove", 2); // Right
+	}
+	if (keys[83]) {
+		socket.emit("requestMove", 3); // Down
 	}
 	if (keys[65]) {
-		socket.emit("requestMove", "left");
+		socket.emit("requestMove", 4); // Left
 	}
 
-	render();
-	requestAnimationFrame(update);
+	console.log("Update loop");
 }
 
 function render() {
 	ctx.clearRect(0, 0, c.width, c.height);
+
+	for (var i = 0; i < playersToDraw.length; i++) {
+		ctx.save();
+		ctx.fillStyle = playersToDraw.color;
+		ctx.arc(playersToDraw[i].x, playersToDraw[i].y, 10, 0, Math.PI * 2);
+		ctx.restore();
+	}
+
+	console.log("Render loop");
+	requestAnimationFrame(update);
 }
 
 document.addEventListener("keydown", function(event) {
@@ -37,4 +46,9 @@ document.addEventListener("keyup", function(event) {
 	keys[event.keyCode] = false;
 });
 
-requestAnimationFrame(update);
+socket.on("updatePlayers", function(data) {
+	playersToDraw = data;
+});
+
+var mainLoop = setInterval(update, 1000/60);
+requestAnimationFrame(render);

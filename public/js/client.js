@@ -21,8 +21,6 @@ function update() {
 	if (keys[65]) {
 		socket.emit("requestMove", 4); // Left
 	}
-
-	console.log("Update loop");
 }
 
 function render() {
@@ -30,13 +28,13 @@ function render() {
 
 	for (var i = 0; i < playersToDraw.length; i++) {
 		ctx.save();
-		ctx.fillStyle = playersToDraw.color;
+		ctx.beginPath();
+		ctx.fillStyle = playersToDraw[i].color;
 		ctx.arc(playersToDraw[i].x, playersToDraw[i].y, 10, 0, Math.PI * 2);
+		ctx.fill();
 		ctx.restore();
 	}
-
-	console.log("Render loop");
-	requestAnimationFrame(update);
+	requestAnimationFrame(render);
 }
 
 document.addEventListener("keydown", function(event) {
@@ -48,6 +46,14 @@ document.addEventListener("keyup", function(event) {
 
 socket.on("updatePlayers", function(data) {
 	playersToDraw = data;
+});
+socket.on("playerDisconnect", function(data) {
+	console.log(data);
+	for (var i = 0; i < playersToDraw.length; i++) {
+		if (playersToDraw[i].id == data) {
+			playersToDraw.splice(i, 1);
+		}
+	}
 });
 
 var mainLoop = setInterval(update, 1000/60);
